@@ -9,3 +9,7 @@ export const getNonNullValue = (value) => {
     return undefined;
   }
 };
+
+export const ItemTypes = {
+  CARD: 'card',
+};

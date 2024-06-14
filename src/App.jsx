@@ -8,7 +8,7 @@ function App() {
     <AuthProvider>
       <GlobalProvider>
         <Router>
-          <Main />
+          <Main/>
         </Router>
       </GlobalProvider>
     </AuthProvider>

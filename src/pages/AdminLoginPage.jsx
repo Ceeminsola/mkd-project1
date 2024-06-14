@@ -5,6 +5,7 @@ import * as yup from "yup";
 import MkdSDK from "../utils/MkdSDK";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../authContext";
+import { GlobalContext } from "../globalContext";
 
 const AdminLoginPage = () => {
   const schema = yup
@@ -14,7 +15,8 @@ const AdminLoginPage = () => {
     })
     .required();
 
-  const { dispatch } = React.useContext(AuthContext);
+  const { dispatch: authDispatch } = React.useContext(AuthContext);
+  const { dispatch: globalDispatch } = React.useContext(GlobalContext);
   const navigate = useNavigate();
   const {
     register,
@@ -28,6 +30,18 @@ const AdminLoginPage = () => {
   const onSubmit = async (data) => {
     let sdk = new MkdSDK();
     //TODO
+    try {
+      const response = await sdk.login(data.email, data.password, 'admin');
+      console.log("response", response)
+
+      authDispatch({ type: 'LOGIN', payload: { role: response.role, token: response.token, 
+        user: { first_name: response.first_name, last_name: response.first_name, photo: response.photo } }});
+      globalDispatch({ type: "SNACKBAR", payload: { message: "Logged in successfully!" } });
+      // Could have handle it from here but I did it in the main to help manage reload of page and prevent user from accessing the login page after logged in.
+      // navigate('/admin/dashboard');
+    } catch (error) {
+      setError('email', { type: 'manual', message: error.message });
+    }
   };
 
   return (
@@ -63,7 +77,7 @@ const AdminLoginPage = () => {
           </label>
           <input
             type="password"
-            placeholder="******************"
+            placeholder=""
             {...register("password")}
             className={`shadow appearance-none border  rounded w-full py-2 px-3 text-gray-700 mb-3 leading-tight focus:outline-none focus:shadow-outline ${
               errors.password?.message ? "border-red-500" : ""

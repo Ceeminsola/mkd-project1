@@ -15,6 +15,24 @@ export default function MkdSDK() {
   
   this.login = async function (email, password, role) {
     //TODO
+    const response = await fetch(this._baseurl + '/v2/api/lambda/login', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-project': base64Encode,
+      },
+      body: JSON.stringify({ email, password, role }),
+    });
+  
+    const data = await response.json();
+  
+    if (response.ok) {
+      localStorage.setItem('token', data.token);
+      localStorage.setItem('role', role);
+      return data;
+    } else {
+      throw new Error(data.message);
+    }
   };
 
   this.getHeader = function () {
@@ -88,6 +106,23 @@ export default function MkdSDK() {
 
   this.check = async function (role) {
     //TODO
+    const response = await fetch(this._baseurl + '/v2/api/lambda/check', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        'x-project': base64Encode,
+        Authorization: "Bearer " + localStorage.getItem("token"),
+      },
+      body: JSON.stringify({ role }),
+    });
+  
+    const data = await response.json();
+  
+    if (response.ok) {
+      return data;
+    } else {
+      throw new Error(data.message);
+    }
   };
 
   return this;

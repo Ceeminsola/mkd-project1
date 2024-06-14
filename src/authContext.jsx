@@ -8,6 +8,7 @@ const initialState = {
   user: null,
   token: null,
   role: null,
+  loading: true,
 };
 
 const reducer = (state, action) => {
@@ -16,6 +17,11 @@ const reducer = (state, action) => {
       //TODO
       return {
         ...state,
+        isAuthenticated: true,
+        token: action.payload.token,
+        role: action.payload.role,
+        user: action.payload.user,
+        loading: false,
       };
     case "LOGOUT":
       localStorage.clear();
@@ -23,6 +29,12 @@ const reducer = (state, action) => {
         ...state,
         isAuthenticated: false,
         user: null,
+        loading: false,
+      };
+    case "SET_LOADING":
+      return {
+        ...state,
+        loading: action.payload,
       };
     default:
       return state;
@@ -46,6 +58,31 @@ const AuthProvider = ({ children }) => {
 
   React.useEffect(() => {
     //TODO
+    const token = localStorage.getItem('token');
+    const role = localStorage.getItem('role');
+
+    if (token && role) {
+      sdk.check(role)
+        .then((response) => {
+          dispatch({
+            type: 'LOGIN',
+            payload: {
+              token,
+              role,
+              user: response.user,
+            },
+          });
+        })
+        .catch((error) => {
+          tokenExpireError(dispatch, error.message);
+        }
+      );
+    }else {
+      dispatch({
+        type: 'SET_LOADING',
+        payload: false,
+      });
+    }
   }, []);
 
   return (
